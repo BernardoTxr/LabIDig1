@@ -22,7 +22,7 @@ def mock_analog_loop(data_queue):
             if estado_anterior != numero_decimal:
                 estado_anterior = numero_decimal
                 timestamp = time.time() - inicial
-                data_queue.put((timestamp, numero_decimal))  # Adiciona na fila
+                data_queue.put((timestamp, numero_decimal))
                 print(f"[Mock] Estado no tempo {timestamp:.2f}s: {numero_decimal}")
 
     except KeyboardInterrupt:
