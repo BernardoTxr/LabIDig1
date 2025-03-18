@@ -4,15 +4,57 @@ import time
 import json
 
 DEVICE_NAME = "Analog Discovery"
-JSON_FILE = "analog_data.json"
-ESTADOS_FINAIS = [31, 63, 127, 255, 511, 1023] 
+JSON_METRICAS = "analog_data.json"
+JSON_SESSOES = "analog_sessions.json"
+ESTADO_INICIAL = 0
+ESTADO_PREPARACAO = 1
+ESTADO_INICIA_SEQUENCIA = 2
+ESTADO_CARREGA_DADO = 3
+ESTADO_MOSTRA_DADO = 4
+ESTADO_ZERA_LEDS = 5
+ESTADO_MOSTRA_ZERO = 6
+ESTADO_CONTA_LED = 7
+ESTADO_COMECA_JOGADAS = 8
+ESTADO_ESPERA_JOGADA = 9
+ESTADO_REGISTRA_JOGADA = 10
+ESTADO_COMPARA = 11
+ESTADO_CONTA_E_PASSA = 12
+ESTADO_FIM_SEQUENCIA = 13
+ESTADO_FIM_GANHOU = 14
+ESTADO_FIM_PERDEU = 15
+ESTADO_FIM_TIMEOUT = 16
+ESTADO_ESCRITA_RAM = 17
+ESTADO_CONTA_RAM = 18
+ESTADO_NOVA_JOGADA = 19
+ESTADOS_FINAIS = [ESTADO_FIM_GANHOU, ESTADO_FIM_PERDEU, ESTADO_FIM_TIMEOUT]
+
+
+'''
+Um arquivo JSON:
+1. Possui métricas consolidadas de uma única sessão:
+    tempo_medio_de_resposta
+    score (numero de acertos)
+    tempo_de_uma_sessao
+'''
+'''
+Dois arquivos JSONs.
+1. Possui métricas consolidadas de todas as sessões.
+    tempo_medio_geral_de_resposta
+    numero_total_de_sessoes
+    tempo_de_todas_as_sessoes
+2. Possui métricas de cada sessão.
+    tempo_medio_de_resposta
+    score (numero de acertos)
+    tempo_de_uma_sessao
+
+'''
+
+
 
 class AnalogReader:
     def __init__(self) -> None:
         self.device_name = DEVICE_NAME
-        self.json_file = JSON_FILE
         self.estados_temp = [] # estados temporários ainda não consolidados
-        self.estados_finais = ESTADOS_FINAIS
 
     def consolidate_data(self, medicoes) -> None:
         """
@@ -20,22 +62,30 @@ class AnalogReader:
         """
         def calcula_tempo_medio_de_resposta(medicoes)->float:
             """
-            Calcula o tempo médio de resposta do dispositivo.
+            Para cada medição em ESPERA_JOGADA, verifica-se o tempo
+            para trocar de estado.
             """
-            tempos = [medicao[1] for medicao in medicoes]
-            return tempos[-1] - tempos[0]
+            soma_tempo = 0
+            contador = 0
+            for i in range(len(medicoes)-1):
+                if (medicoes[i][0] == ESTADO_ESPERA_JOGADA):
+                    soma_tempo += medicoes[i+1][1] - medicoes[i][1]
+                    contador += 1
+            return soma_tempo/contador
+
         def calcula_numero_total_de_sessoes(medicoes)->int:
             """
-            Calcula o número total de sessões de medição.
+            Acho que isso faz mais sentido fazer no próprio dashboard
             """
-            return len(medicoes)
+            pass
+        
         # cria um dicionário com os dados consolidados
         dados_consolidados = {
             "tempo_medio_de_resposta": calcula_tempo_medio_de_resposta(medicoes),
             "numero_total_de_sessoes": calcula_numero_total_de_sessoes(medicoes)
         }
         # salva os dados consolidados em um arquivo JSON
-        with open(self.json_file, "w") as file:
+        with open(JSON_METRICAS, "w") as file:
             json.dump(dados_consolidados, file)
 
         
@@ -82,7 +132,7 @@ class AnalogReader:
                     print("Estado no tempo "+str(time.time()-inicial)+": " + str(numero_decimal))
                 
                 # se chegar em um dos estados finais, consolida os dados
-                if (numero_decimal in self.estados_finais):
+                if (numero_decimal in ESTADOS_FINAIS):
                     self.consolidate_data(self.estados_temp)
                     self.estados_temp = []
 
