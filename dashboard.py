@@ -3,27 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 
-# Simulação de dados (substituir pelos dados da FPGA)
-def generate_mock_data():
-    import numpy as np
 
-    timestamps = pd.date_range(start="2024-01-01", periods=100, freq="S")
-    estados = np.random.choice(
-        ["Acerto", "Erro", "Timeout"], size=100, p=[0.7, 0.2, 0.1]
-    )
-    tempos_resposta = np.random.randint(1, 5, size=100)  # Tempo de resposta em segundos
-    return pd.DataFrame(
-        {"Timestamp": timestamps, "Estado": estados, "Tempo_Resposta": tempos_resposta}
-    )
-
-
-# Carregar dados (trocar pela leitura dos dados reais)
-df = generate_mock_data()
-
-# Criar colunas para análise
-df["Acertos"] = df["Estado"] == "Acerto"
-df["Erros"] = df["Estado"] == "Erro"
-df["Timeouts"] = df["Estado"] == "Timeout"
 
 # Layout do dashboard
 st.title("📊 Dashboard de Métricas do Jogo Genius")
