@@ -7,7 +7,7 @@ import pandas as pd
 
 DEVICE_NAME = "Analog Discovery 2"
 CSV_METRICAS = 'metricas.csv'
-SLEEP_DELAY = 0.01
+SLEEP_DELAY = 0.1
 ESTADO_INICIAL = 0
 ESTADO_PREPARACAO = 1
 ESTADO_INICIA_SEQUENCIA = 2
@@ -76,7 +76,7 @@ class AnalogReader:
             for i in range(len(medicoes)):
                 if (medicoes[i][0] == ESTADO_ESPERA_JOGADA):
                     contador += 1
-            if contador ==0:
+            if contador==0:
                 retorno = 0
             else:
                 retorno = contador - 1
@@ -90,7 +90,7 @@ class AnalogReader:
         dados_consolidados = {
             "tempo_medio_de_resposta": calcula_tempo_medio_de_resposta(medicoes),
             "numero_de_acertos": calcula_numero_de_acertos(medicoes),
-            "tempo_da_sessao": calcula_tempo_da_sessao
+            "tempo_da_sessao": calcula_tempo_da_sessao(medicoes)
         }
         
         # Carrega o CSV existente e adiciona os novos dados
